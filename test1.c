@@ -25,10 +25,9 @@ char		send_buffer[MAX_MSG_SIZE], recv_buffer[MAX_MSG_SIZE];
 
 void	err(char* msg)
 {
-	if (msg)
-		write(2, msg, strlen(msg));
-	else
-		write(2, "Fatal error\n", 13);
+	if (!msg)
+		msg = "Fatal error\n";
+	write(2, msg, strlen(msg));
 	exit(1);
 }
 
@@ -46,25 +45,20 @@ int		main(int ac, char** av)
 	if (ac != 2)
 		err("Wrong number of arguments\n");
 	
-	// socket creation
 	int	sockfd, connfd;
 
 	sockfd = socket(2, SOCK_STREAM, 0);
 	FD_ZERO(&current);
 	FD_SET(sockfd, &current);
 
-	// assign IP+port
 	struct sockaddr_in	servaddr = {0};
-
 	servaddr.sin_family = 2;
 	servaddr.sin_addr.s_addr = htonl(0x7f000001);
 	servaddr.sin_port = htons(atoi(av[1]));
 
-	// bind
-	if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
+	if (bind(sockfd, (const struct sockaddr*)&servaddr, sizeof(servaddr)) != 0)
 		err(NULL);
-
-	// main loop
+	
 	listen(sockfd, 10);
 	maxfd = sockfd;
 	while (1)
@@ -81,7 +75,7 @@ int		main(int ac, char** av)
 					struct sockaddr_in	cli = {0};
 					socklen_t			len = sizeof(cli);
 
-					connfd = accept(sockfd, (struct sockaddr *)&cli, &len);
+					connfd = accept(sockfd, (struct sockaddr*)&cli, &len);
 					if (connfd < 0)
 						err(NULL);
 					if (connfd > maxfd)
